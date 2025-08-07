@@ -27,6 +27,9 @@ func main() {
 	authmethodFlag := flag.String("mechanism", "PLAIN", "SASL Mechanism")
 	protocolFlag := flag.String("security-protocol", "SASL_SSL", "Security Protocol")
 	topicFlag := flag.String("topic", "", "Kafka Topic")
+	consumerFlag := flag.String("consumergroup", "", "Kafka Consumer Group")
+	warningFlag := flag.Int64("warning", 5000, "Warning Level")
+	criticalFlag := flag.Int64("critial", 10000, "Critial Level")
 	flag.Parse()
 
 	switch *commandFlag {
@@ -39,6 +42,15 @@ func main() {
 	case "describetopic":
 		kafkaConnection := functions.Connect(*clusterFlag, *usernameFlag, *passwordFlag, *authmethodFlag, *protocolFlag)
 		functions.GetTopicDetails(kafkaConnection, *topicFlag)
+	case "listconsumergroups":
+		kafkaConnection := functions.Connect(*clusterFlag, *usernameFlag, *passwordFlag, *authmethodFlag, *protocolFlag)
+		functions.GetConsumerGroups(kafkaConnection)
+	case "describeconsumergroup":
+		kafkaConnection := functions.Connect(*clusterFlag, *usernameFlag, *passwordFlag, *authmethodFlag, *protocolFlag)
+		functions.GetConsumerGroupDetails(kafkaConnection, *consumerFlag)
+	case "consumergrouptopiclag":
+		kafkaConnection := functions.Connect(*clusterFlag, *usernameFlag, *passwordFlag, *authmethodFlag, *protocolFlag)
+		functions.GetConsumerGroupLag(kafkaConnection, *consumerFlag, *topicFlag, *warningFlag, *criticalFlag)
 	default:
 		fmt.Printf("no valid command\n")
 		os.Exit(9)
