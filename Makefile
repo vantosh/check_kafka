@@ -13,7 +13,10 @@ default: build
 
 build:
 	@echo "Building $(PROGRAM)"
-	@time go build -trimpath -ldflags '-X check_kafka/version.Version=$(VERSION) check_kafka/version.GitRevision=$(GITREVISION) check_kafka/version.Builder=$(BUILDERNAME) -X conferencehooks/version.GitBranch=$(BUILDBRANCH) -s -w' -o $(PROGRAM) $(PROGRAM).go
+	@time go build -trimpath -ldflags 'check_kafka/version.GitRevision=$(GITREVISION) check_kafka/version.Builder=$(BUILDERNAME) -X conferencehooks/version.GitBranch=$(BUILDBRANCH) -s -w' -o $(PROGRAM) $(PROGRAM).go
+
+buildversion:
+	time go build -trimpath -ldflags '-X check_kafka/version.Version=$(VERSION) check_kafka/version.GitRevision=$(GITREVISION) check_kafka/version.Builder=$(BUILDERNAME) -X conferencehooks/version.GitBranch=$(BUILDBRANCH) -s -w' -o $(PROGRAM) $(PROGRAM).go
 
 clean:
 	@echo "Cleaning $(PROGRAM)"
