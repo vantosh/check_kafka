@@ -27,7 +27,7 @@ func GetConsumerGroups(aK *kafka.AdminClient) {
 	listConsumerGroups, err := aK.ListConsumerGroups(ctx, options...)
 	if err != nil {
 		fmt.Printf("Failed to describe consumer groups\n%s", err)
-		os.Exit(1)
+		os.Exit(2)
 	}
 
 	cGroups := listConsumerGroups.Valid
@@ -48,7 +48,7 @@ func GetConsumerGroupDetails(aK *kafka.AdminClient, consumerGroupName string) {
 	describeGroupsResult, err := aK.DescribeConsumerGroups(ctx, consumergroups, kafka.SetAdminOptionIncludeAuthorizedOperations(false))
 	if err != nil {
 		fmt.Printf("Failed to describe group: %s\n%s", consumerGroupName, err)
-		os.Exit(1)
+		os.Exit(2)
 	}
 
 	fmt.Printf("Consumer Group %s (%s) - state: %s - type %s\n\tPartition assignor: %s - coorinator: %s - members: %v\n\tError: %s",
