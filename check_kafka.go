@@ -29,12 +29,12 @@ func main() {
 	topicFlag := flag.String("topic", "", "Kafka Topic")
 	consumerFlag := flag.String("consumergroup", "", "Kafka Consumer Group")
 	warningFlag := flag.Int64("warning", 5000, "Warning Level")
-	criticalFlag := flag.Int64("critial", 10000, "Critial Level")
+	criticalFlag := flag.Int64("critical", 10000, "Critial Level")
 	flag.Parse()
 
 	switch *commandFlag {
 	case "version":
-		fmt.Printf("Check Kafka\nLicense: Apache v2\nVersion: %s\ngit : (%s) %s\nBuilder: %s\nClient: %s\n", version.Version, version.GitBranch, version.GitRevision, version.Builder, version.Client)
+		fmt.Printf("Check Kafka\n=========================\nLicense: Apache v2\nVersion: %s\ngit : (%s) %s\nBuilder: %s\nClient: %s\n--------------------------\n", version.Version, version.GitBranch, version.GitRevision, version.Builder, version.Client)
 		os.Exit(0)
 	case "describecluster":
 		kafkaConnection := functions.Connect(*clusterFlag, *usernameFlag, *passwordFlag, *authmethodFlag, *protocolFlag)
