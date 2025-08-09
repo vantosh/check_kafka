@@ -45,7 +45,7 @@ func GetConsumerGroupLag(aK *kafka.AdminClient, consumerGroupName string, topicN
 		fmt.Printf("Failed to list topic %s offsets\n%s\n", lErr)
 		os.Exit(1)
 	}
-	topicLag := lO.ResultInfos[tp].Offset
+	topicLag := int64(lO.ResultInfos[tp].Offset)
 
 	cgO, cgErr := aK.ListConsumerGroupOffsets(ctx, gps, kafka.SetAdminRequireStableOffsets(true))
 	if cgErr != nil {
@@ -57,8 +57,8 @@ func GetConsumerGroupLag(aK *kafka.AdminClient, consumerGroupName string, topicN
 	fmt.Printf("Consumer Group %s on topic %s has a Lag of %s (offset %s)\n", consumerGroupName, topicName, topicLag, consumerGroupOffset)
 	fmt.Printf("|lag=%d;%d;%d;0;999999;", topicLag, warningLevel, criticalLevel)
 	if(topicLag > warningLevel) {
-		os.exit(1)
-	} else if topic > criticalLevel) {
+		os.Exit(1)
+	} else if(topicLag > criticalLevel) {
 		os.Exit(2)
 	} else {
 		os.Exit(0)
