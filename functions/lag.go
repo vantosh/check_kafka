@@ -34,7 +34,8 @@ func GetConsumerGroupLag(aK *kafka.AdminClient, consumerGroupName string, topicN
 		Topic: &topicName,
 		Partition: int32(partitions[0].Partition),
 	}
-	topicPartitionOffsets[tp] = kafka.LatestOffsetSpec
+	//topicPartitionOffsets[tp] = kafka.LatestOffsetSpec
+	topicPartitionOffsets[tp] = kafka.EarliestOffsetSpec
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -55,5 +56,9 @@ func GetConsumerGroupLag(aK *kafka.AdminClient, consumerGroupName string, topicN
 
 	fmt.Printf("Consumer Group %s on topic %s has a Lag of %s (offset %s)\n", consumerGroupName, topicName, topicLag, consumerGroupOffset)
 	fmt.Printf("|lag=%d;%d;%d;0;999999;", topicLag, warningLevel, criticalLevel)
+
+
 	os.Exit(0)
+
+
 }
