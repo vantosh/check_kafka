@@ -11,8 +11,8 @@
 
 package version
 
-var Version string = "v0.0.0"
+var Version string
 var GitRevision string
 var GitBranch string
 var Builder string
-var Client string = "check_kafka"
+var Client string
