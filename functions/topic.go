@@ -31,7 +31,7 @@ func GetTopicDetails(aK *kafka.AdminClient, topicName string) {
 		os.Exit(1)
 	}
 
-	fmt.Printf("Topic %s (%s) available with %d partitions\n", topicName, describeTopicsResult.TopicDescriptions[0].TopicID, len(describeTopicsResult.TopicDescriptions[0].Partitions))
+	fmt.Printf("Topic %s available with %d partitions\n", topicName, len(describeTopicsResult.TopicDescriptions[0].Partitions))
 	for i := 0; i < len(describeTopicsResult.TopicDescriptions[0].Partitions); i++ {
 		fmt.Printf("\tPartition %d with leader %s and replica count %d\n",
 			describeTopicsResult.TopicDescriptions[0].Partitions[i].Partition, describeTopicsResult.TopicDescriptions[0].Partitions[i].Leader, len(describeTopicsResult.TopicDescriptions[0].Partitions[i].Replicas))
