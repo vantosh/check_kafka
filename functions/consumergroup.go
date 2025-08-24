@@ -51,7 +51,7 @@ func GetConsumerGroupDetails(aK *kafka.AdminClient, consumerGroupName string) {
 		os.Exit(2)
 	}
 
-	if(describeGroupsResult.ConsumerGroupDescriptions[0].Stat == "Dead") {
+	if(string(describeGroupsResult.ConsumerGroupDescriptions[0].State) == "Dead") {
 		fmt.Printf("Consumer Group %s\n\tState: %s\n\tCoordinator: %s\n\tError: %s",
 			consumerGroupName,
 			describeGroupsResult.ConsumerGroupDescriptions[0].State,
