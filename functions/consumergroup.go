@@ -51,14 +51,18 @@ func GetConsumerGroupDetails(aK *kafka.AdminClient, consumerGroupName string) {
 		os.Exit(2)
 	}
 
-	fmt.Printf("Consumer Group %s (%s) - state: %s - type %s\n\tPartition assignor: %s - coorinator: %s - members: %v\n\tError: %s",
+	if(describeGroupsResult.ConsumerGroupDescriptions[0].Stat == "Dead") {
+		fmt.Printf("Consumer Group %s\n\tState: %s\n\tCoordinator: %s\n\tError: %s",
+			consumerGroupName,
+			describeGroupsResult.ConsumerGroupDescriptions[0].State,
+			describeGroupsResult.ConsumerGroupDescriptions[0].Coordinator,
+			describeGroupsResult.ConsumerGroupDescriptions[0].Error)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Consumer Group %s\n\tState: %s\n\tCoordinator: %s",
 		consumerGroupName,
-		describeGroupsResult.ConsumerGroupDescriptions[0].GroupID,
 		describeGroupsResult.ConsumerGroupDescriptions[0].State,
-		describeGroupsResult.ConsumerGroupDescriptions[0].Type,
-		describeGroupsResult.ConsumerGroupDescriptions[0].PartitionAssignor,
-		describeGroupsResult.ConsumerGroupDescriptions[0].Coordinator,
-		describeGroupsResult.ConsumerGroupDescriptions[0].Members,
-		describeGroupsResult.ConsumerGroupDescriptions[0].Error)
+		describeGroupsResult.ConsumerGroupDescriptions[0].Coordinator)
 	os.Exit(0)
 }
