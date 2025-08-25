@@ -51,18 +51,19 @@ func GetConsumerGroupDetails(aK *kafka.AdminClient, consumerGroupName string) {
 		os.Exit(2)
 	}
 
-	if(string(describeGroupsResult.ConsumerGroupDescriptions[0].State) == "Dead") {
-		fmt.Printf("Consumer Group %s\n\tState: %s\n\tCoordinator: %s\n\tError: %s",
-			consumerGroupName,
-			describeGroupsResult.ConsumerGroupDescriptions[0].State,
-			describeGroupsResult.ConsumerGroupDescriptions[0].Coordinator,
-			describeGroupsResult.ConsumerGroupDescriptions[0].Error)
-		os.Exit(1)
+	cgState := fmt.Sprintf("%s", describeGroupsResult.ConsumerGroupDescriptions[0].State)
+	fmt.Printf("Consumer Group %s\n\tState: %s", consumerGroupName, describeGroupsResult.ConsumerGroupDescriptions[0].State)
+	if(cgState == "Unknown") {
+		os.Exit(3)
 	}
-
-	fmt.Printf("Consumer Group %s\n\tState: %s\n\tCoordinator: %s",
-		consumerGroupName,
-		describeGroupsResult.ConsumerGroupDescriptions[0].State,
-		describeGroupsResult.ConsumerGroupDescriptions[0].Coordinator)
-	os.Exit(0)
+	fmt.Printf("\n\tCoordinator: %s", describeGroupsResult.ConsumerGroupDescriptions[0].Coordinator)
+	if(cgState == "Stable") {
+		os.Exit(0)
+	} else if(cgState == "Dead") {
+		os.Exit(2)
+	} else if(cgState == "PreparingRebalance" || cgState == "CompletingRebalance") {
+		os.Exit(1)
+	} else {
+		os.Exit(3)
+	}
 }
