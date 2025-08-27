@@ -64,6 +64,7 @@ func GetConsumerGroupLag(aK *kafka.AdminClient, consumerGroupName string, topicN
 
 	fmt.Printf("Consumer Group %s on topic %s has a Lag of %d \n", consumerGroupName, topicName, topicLags)
 	if(verboseBool == true) {
+		fmt.Print("\tPartitions : %v\n", partitions)
 		fmt.Printf(debugLines)
 	}
 	fmt.Printf("|lag=%d;%d;%d;0;999999;", topicLags, warningLevel, criticalLevel)
