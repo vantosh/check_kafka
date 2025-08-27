@@ -30,6 +30,7 @@ func main() {
 	consumerFlag := flag.String("consumergroup", "", "Kafka Consumer Group")
 	warningFlag := flag.Int64("warning", 5000, "Warning Level")
 	criticalFlag := flag.Int64("critical", 10000, "Critial Level")
+	verboseFlag := flag.Bool("verbose", false, "Verbose output")
 	flag.Parse()
 
 	switch *commandFlag {
@@ -50,7 +51,7 @@ func main() {
 		functions.GetConsumerGroupDetails(kafkaConnection, *consumerFlag)
 	case "consumergrouptopiclag":
 		kafkaConnection := functions.Connect(*clusterFlag, *usernameFlag, *passwordFlag, *authmethodFlag, *protocolFlag)
-		functions.GetConsumerGroupLag(kafkaConnection, *consumerFlag, *topicFlag, *warningFlag, *criticalFlag)
+		functions.GetConsumerGroupLag(kafkaConnection, *consumerFlag, *topicFlag, *warningFlag, *criticalFlag, *verboseFlag)
 	default:
 		fmt.Printf("no valid command\n")
 		os.Exit(9)

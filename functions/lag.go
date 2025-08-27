@@ -19,7 +19,7 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
-func GetConsumerGroupLag(aK *kafka.AdminClient, consumerGroupName string, topicName string, warningLevel int64, criticalLevel int64) {
+func GetConsumerGroupLag(aK *kafka.AdminClient, consumerGroupName string, topicName string, warningLevel int64, criticalLevel int64, verboseBool bool) {
 	partitions := GetTopicPartitions(aK, topicName)
 
 	gps := []kafka.ConsumerGroupTopicPartitions{
@@ -29,35 +29,46 @@ func GetConsumerGroupLag(aK *kafka.AdminClient, consumerGroupName string, topicN
 		},
 	}
 
-	topicPartitionOffsets := make(map[kafka.TopicPartition]kafka.OffsetSpec)
-	tp := kafka.TopicPartition{
-		Topic: &topicName,
-		Partition: int32(partitions[0].Partition),
-	}
-	topicPartitionOffsets[tp] = kafka.LatestOffsetSpec
-
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
-	lO, lErr := aK.ListOffsets(ctx, topicPartitionOffsets, kafka.SetAdminIsolationLevel(kafka.IsolationLevelReadCommitted))
-	if lErr != nil {
-		fmt.Printf("Failed to list topic %s offsets\n%s\n", lErr)
-		os.Exit(2)
-	}
-	topicLag := int64(lO.ResultInfos[tp].Offset)
+	var topicLags int64 = 0
+	var debugLines string
+	for _, partition := range partitions {
+		topicPartitionOffsets := make(map[kafka.TopicPartition]kafka.OffsetSpec)
+		tp := kafka.TopicPartition{
+			Topic: &topicName,
+			Partition: int32(partition.Partition),
+		}
+		topicPartitionOffsets[tp] = kafka.EarliestOffsetSpec
 
-	cgO, cgErr := aK.ListConsumerGroupOffsets(ctx, gps, kafka.SetAdminRequireStableOffsets(true))
-	if cgErr != nil {
-		fmt.Printf("Failed to list consumer group %s on topic %s offsets\n%s\n", consumerGroupName, topicName, cgErr)
-		os.Exit(2)
-	}
-	consumerGroupOffset := int64(cgO.ConsumerGroupsTopicPartitions[0].Partitions[0].Offset)
+		lO, lErr := aK.ListOffsets(ctx, topicPartitionOffsets, kafka.SetAdminIsolationLevel(kafka.IsolationLevelReadCommitted))
+		if lErr != nil {
+			fmt.Printf("Failed to list topic %s offsets\n%s\n", lErr)
+			os.Exit(2)
+		}
+		topicOffset := int64(lO.ResultInfos[tp].Offset)
 
-	fmt.Printf("Consumer Group %s on topic %s has a Lag of %d (offset %d)\n", consumerGroupName, topicName, topicLag, consumerGroupOffset)
-	fmt.Printf("|lag=%d;%d;%d;0;999999;", topicLag, warningLevel, criticalLevel)
-	if(topicLag > warningLevel) {
+		cgO, cgErr := aK.ListConsumerGroupOffsets(ctx, gps, kafka.SetAdminRequireStableOffsets(true))
+		if cgErr != nil {
+			fmt.Printf("Failed to list consumer group %s on topic %s offsets\n%s\n", consumerGroupName, topicName, cgErr)
+			os.Exit(2)
+		}
+		consumerGroupOffset := int64(cgO.ConsumerGroupsTopicPartitions[0].Partitions[0].Offset)
+
+		topicLag := topicOffset - consumerGroupOffset
+		debugLines = fmt.Sprint("\t\tPartition %v : %d (%d - %d)\n", partition.Partition, topicLag, topicOffset, consumerGroupOffset)
+		topicLags = topicLags + topicLag
+	}
+
+	fmt.Printf("Consumer Group %s on topic %s has a Lag of %d \n", consumerGroupName, topicName, topicLags)
+	if(verboseBool == true) {
+		fmt.Printf(debugLines)
+	}
+	fmt.Printf("|lag=%d;%d;%d;0;999999;", topicLags, warningLevel, criticalLevel)
+	if(topicLags > warningLevel) {
 		os.Exit(1)
-	} else if(topicLag > criticalLevel) {
+	} else if(topicLags > criticalLevel) {
 		os.Exit(2)
 	} else {
 		os.Exit(0)
