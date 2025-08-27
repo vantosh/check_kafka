@@ -38,7 +38,8 @@ func GetConsumerGroupLag(aK *kafka.AdminClient, consumerGroupName string, topicN
 		topicPartitionOffsets := make(map[kafka.TopicPartition]kafka.OffsetSpec)
 		tp := kafka.TopicPartition{
 			Topic: &topicName,
-			Partition: int32(partitions[partKey].Partition),
+			//Partition: int32(partitions[partKey].Partition),
+			Partition: int32(partKey),
 		}
 		topicPartitionOffsets[tp] = kafka.EarliestOffsetSpec
 
@@ -57,7 +58,7 @@ func GetConsumerGroupLag(aK *kafka.AdminClient, consumerGroupName string, topicN
 		consumerGroupOffset := int64(cgO.ConsumerGroupsTopicPartitions[0].Partitions[0].Offset)
 
 		topicLag := topicOffset - consumerGroupOffset
-		debugLines = debugLines + fmt.Sprint("\t\tPartition %v : %d (%d - %d)\n", partValue, topicLag, topicOffset, consumerGroupOffset)
+		debugLines = debugLines + fmt.Sprintf("\t\tPartition %v (%d) : %d (%d - %d)\n", partValue, partKey, topicLag, topicOffset, consumerGroupOffset)
 		topicLags = topicLags + topicLag
 	}
 
