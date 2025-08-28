@@ -57,7 +57,6 @@ func GetTopicPartitions(aK *kafka.AdminClient, topicName string) []kafka.TopicPa
 		partitions = append(partitions, kafka.TopicPartition{
 			Topic: &topicName,
 			Partition: int32(describeTopicsResult.TopicDescriptions[0].Partitions[i].Partition),
-			Offset: kafka.Offset(int64(999999)),
 		})
 	}
 
