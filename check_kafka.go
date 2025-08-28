@@ -33,27 +33,26 @@ func main() {
 	verboseFlag := flag.Bool("verbose", false, "Verbose output")
 	flag.Parse()
 
-	switch *commandFlag {
-	case "version":
-		fmt.Printf("Check Kafka\n=========================\nLicense: Apache v2\nVersion: %s\ngit : (%s) %s\nBuilder: %s\nClient: %s\n--------------------------\n", version.Version, version.GitBranch, version.GitRevision, version.Builder, version.Client)
+	if(*commandFlag == "version") {
+		version.PrintVersion()
 		os.Exit(0)
-	case "describecluster":
-		kafkaConnection := functions.Connect(*clusterFlag, *usernameFlag, *passwordFlag, *authmethodFlag, *protocolFlag)
-		functions.GetClusterDetails(kafkaConnection)
-	case "describetopic":
-		kafkaConnection := functions.Connect(*clusterFlag, *usernameFlag, *passwordFlag, *authmethodFlag, *protocolFlag)
-		functions.GetTopicDetails(kafkaConnection, *topicFlag)
-	case "listconsumergroups":
-		kafkaConnection := functions.Connect(*clusterFlag, *usernameFlag, *passwordFlag, *authmethodFlag, *protocolFlag)
-		functions.GetConsumerGroups(kafkaConnection)
-	case "describeconsumergroup":
-		kafkaConnection := functions.Connect(*clusterFlag, *usernameFlag, *passwordFlag, *authmethodFlag, *protocolFlag)
-		functions.GetConsumerGroupDetails(kafkaConnection, *consumerFlag)
-	case "consumergrouptopiclag":
-		kafkaConnection := functions.Connect(*clusterFlag, *usernameFlag, *passwordFlag, *authmethodFlag, *protocolFlag)
-		functions.GetConsumerGroupLag(kafkaConnection, *consumerFlag, *topicFlag, *warningFlag, *criticalFlag, *verboseFlag)
-	default:
-		fmt.Printf("no valid command\n")
-		os.Exit(9)
+	} else {
+		kafkaAdmin := functions.AdminConnect(*clusterFlag, *usernameFlag, *passwordFlag, *authmethodFlag, *protocolFlag)
+		switch *commandFlag {
+		case "describecluster":
+			functions.GetClusterDetails(kafkaAdmin)
+		case "describetopic":
+			functions.GetTopicDetails(kafkaAdmin, *topicFlag)
+		case "listconsumergroups":
+			functions.GetConsumerGroups(kafkaAdmin)
+		case "describeconsumergroup":
+			functions.GetConsumerGroupDetails(kafkaAdmin, *consumerFlag)
+		case "consumergrouptopiclag":
+			kafkaConsumer := functions.ConsumerConnect(*clusterFlag, *usernameFlag, *passwordFlag, *authmethodFlag, *protocolFlag)
+			functions.GetConsumerGroupLag(kafkaAdmin, kafkaConsumer, *consumerFlag, *topicFlag, *warningFlag, *criticalFlag, *verboseFlag)
+		default:
+			fmt.Printf("no valid command\n")
+			os.Exit(9)
+		}
 	}
 }
