@@ -59,10 +59,10 @@ func GetConsumerGroupLag(aK *kafka.AdminClient, cK *kafka.Consumer, consumerGrou
 		fmt.Printf(debugLines)
 	}
 	fmt.Printf("|lag=%d;%d;%d;0;999999;", topicLags, warningLevel, criticalLevel)
-	if(topicLags > warningLevel) {
-		os.Exit(1)
-	} else if(topicLags > criticalLevel) {
+	if(topicLags > criticalLevel) {
 		os.Exit(2)
+	} else if(topicLags > warningLevel) {
+		os.Exit(1)
 	} else {
 		os.Exit(0)
 	}
