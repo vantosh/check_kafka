@@ -44,13 +44,13 @@ func GetConsumerGroupLag(aK *kafka.AdminClient, cK *kafka.Consumer, consumerGrou
 		if(errWM != nil) {
 			fmt.Printf("Failed to get topic %s offset\n%s\n", topicName, errWM)
 		}
-		debugLines = debugLines + fmt.Sprintf("\t\tWatermark : %s - %s", lowWM, highWM)
 		topicOffset := highWM
 
 		consumerGroupOffset := int64(cgO.ConsumerGroupsTopicPartitions[0].Partitions[partValue.Partition].Offset)
 
 		topicLag := topicOffset - consumerGroupOffset
-		debugLines = debugLines + fmt.Sprintf("\t\tPartition %d : %d (%d - %d)\n", partValue.Partition, topicLag, topicOffset, consumerGroupOffset)
+		debugLines = debugLines + fmt.Sprintf("\tPartition %d : %d (%d - %d)\n", partValue.Partition, topicLag, topicOffset, consumerGroupOffset)
+		debugLines = debugLines + fmt.Sprintf("\tWatermark : %d - %d\n", lowWM, highWM)
 		topicLags = topicLags + topicLag
 	}
 
