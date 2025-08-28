@@ -48,12 +48,14 @@ func GetConsumerGroupLag(aK *kafka.AdminClient, consumerGroupName string, topicN
 		//topicPartitionOffsets[tp] = kafka.EarliestOffsetSpec
 		topicPartitionOffsets[tp] = kafka.LatestOffsetSpec
 
-		lO, lErr := aK.ListOffsets(ctx, topicPartitionOffsets, kafka.SetAdminIsolationLevel(kafka.IsolationLevelReadCommitted))
+		lO, lErr := aK.ListOffsets(ctx, topicPartitionOffsets, kafka.SetAdminIsolationLevel(kafka.IsolationLevelReadUncommitted))
 		if lErr != nil {
 			fmt.Printf("Failed to list topic %s offsets\n%s\n", lErr)
 			os.Exit(2)
 		}
-		topicOffset := int64(lO.ResultInfos[tp].Offset)
+		//topicOffset := int64(lO.ResultInfos[tp].Offset)
+		debugLines = debugLines + fmt.Sprintf("\tResultInfos : %v", lO.ResultInfos[tp])
+		topicOffset := int64(tp.Offset)
 
 		consumerGroupOffset := int64(cgO.ConsumerGroupsTopicPartitions[0].Partitions[partKey].Offset)
 
