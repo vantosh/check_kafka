@@ -19,7 +19,7 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
-func GetConsumerGroupLag(aK *kafka.AdminClient, consumerGroupName string, topicName string, warningLevel int64, criticalLevel int64, verboseBool bool) {
+func GetConsumerGroupLag(aK *kafka.AdminClient, cK *kafka.Consumer, consumerGroupName string, topicName string, warningLevel int64, criticalLevel int64, verboseBool bool) {
 	partitions := GetTopicPartitions(aK, topicName)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
@@ -36,31 +36,21 @@ func GetConsumerGroupLag(aK *kafka.AdminClient, consumerGroupName string, topicN
 		fmt.Printf("Failed to list consumer group %s on topic %s offsets\n%s\n", consumerGroupName, topicName, cgErr)
 		os.Exit(2)
 	}
-	topicPartitionOffsets := make(map[kafka.TopicPartition]kafka.OffsetSpec)
 
 	var topicLags int64 = 0
 	var debugLines string
-	for partKey, partValue := range partitions {
-		tp := kafka.TopicPartition{
-			Topic: &topicName,
-			Partition: int32(partitions[partKey].Partition),
+	for _, partValue := range partitions {
+		lowWM, highWM, errWM := cK.QueryWatermarkOffsets(topicName, int32(partValue.Partition), 1000)
+		if(errWM != nil) {
+			fmt.Printf("Failed to get topic %s offset\n%s\n", topicName, errWM)
 		}
-		//topicPartitionOffsets[tp] = kafka.EarliestOffsetSpec
-		topicPartitionOffsets[tp] = kafka.LatestOffsetSpec
+		debugLines = debugLines + fmt.Sprintf("\t\tWatermark : %s - %s", lowWM, highWM)
+		topicOffset := highWM
 
-		lO, lErr := aK.ListOffsets(ctx, topicPartitionOffsets, kafka.SetAdminIsolationLevel(kafka.IsolationLevelReadUncommitted))
-		if lErr != nil {
-			fmt.Printf("Failed to list topic %s offsets\n%s\n", lErr)
-			os.Exit(2)
-		}
-		//topicOffset := int64(lO.ResultInfos[tp].Offset)
-		debugLines = debugLines + fmt.Sprintf("\tResultInfos : %v", lO.ResultInfos[tp])
-		topicOffset := int64(tp.Offset)
-
-		consumerGroupOffset := int64(cgO.ConsumerGroupsTopicPartitions[0].Partitions[partKey].Offset)
+		consumerGroupOffset := int64(cgO.ConsumerGroupsTopicPartitions[0].Partitions[partValue.Partition].Offset)
 
 		topicLag := topicOffset - consumerGroupOffset
-		debugLines = debugLines + fmt.Sprintf("\t\tPartition %v (%d) : %d (%d - %d)\n", partValue, partKey, topicLag, topicOffset, consumerGroupOffset)
+		debugLines = debugLines + fmt.Sprintf("\t\tPartition %d : %d (%d - %d)\n", partValue.Partition, topicLag, topicOffset, consumerGroupOffset)
 		topicLags = topicLags + topicLag
 	}
 
