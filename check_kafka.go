@@ -48,7 +48,7 @@ func main() {
 		case "describeconsumergroup":
 			functions.GetConsumerGroupDetails(kafkaAdmin, *consumerFlag)
 		case "consumergrouptopiclag":
-			kafkaConsumer := functions.ConsumerConnect(*clusterFlag, *usernameFlag, *passwordFlag, *authmethodFlag, *protocolFlag)
+			kafkaConsumer := functions.ConsumerConnect(*clusterFlag, *usernameFlag, *passwordFlag, *authmethodFlag, *protocolFlag, *consumerFlag)
 			functions.GetConsumerGroupLag(kafkaAdmin, kafkaConsumer, *consumerFlag, *topicFlag, *warningFlag, *criticalFlag, *verboseFlag)
 		default:
 			fmt.Printf("no valid command\n")

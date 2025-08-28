@@ -18,13 +18,11 @@ func AdminConnect(clusterName string, userName string, passWord string, authMeth
 			"sasl.mechanism": authMethod,
 			"security.protocol": securityProtocol,
 			"client.id": fmt.Sprintf("%s - %s", version.Client, version.Version),
-			"auto.offset.reset": "earliest",
 		})
 	} else {
 		a, err = kafka.NewAdminClient(&kafka.ConfigMap{
 			"bootstrap.servers": clusterName,
 			"client.id": fmt.Sprintf("%s - %s", version.Client, version.Version),
-			"auto.offset.reset": "earliest",
 		})
 	}
 	if err != nil {
@@ -35,7 +33,7 @@ func AdminConnect(clusterName string, userName string, passWord string, authMeth
 }
 
 
-func ConsumerConnect(clusterName string, userName string, passWord string, authMethod string, securityProtocol string) *kafka.Consumer {
+func ConsumerConnect(clusterName string, userName string, passWord string, authMethod string, securityProtocol string, consumerGroup string) *kafka.Consumer {
 	var err error
 	var c *kafka.Consumer
 	if(userName != "" && passWord != "") {
@@ -46,6 +44,7 @@ func ConsumerConnect(clusterName string, userName string, passWord string, authM
 			"sasl.mechanism": authMethod,
 			"security.protocol": securityProtocol,
 			"client.id": fmt.Sprintf("%s - %s", version.Client, version.Version),
+			"group.id": consumerGroup,
 			"auto.offset.reset": "earliest",
 		})
 	} else {
