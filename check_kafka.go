@@ -50,6 +50,9 @@ func main() {
 		case "consumergrouptopiclag":
 			kafkaConsumer := functions.ConsumerConnect(*clusterFlag, *usernameFlag, *passwordFlag, *authmethodFlag, *protocolFlag, *consumerFlag)
 			functions.GetConsumerGroupLag(kafkaAdmin, kafkaConsumer, *consumerFlag, *topicFlag, *warningFlag, *criticalFlag, *verboseFlag)
+		case "topiclastactivity":
+			kafkaConsumer := functions.ConsumerConnect(*clusterFlag, *usernameFlag, *passwordFlag, *authmethodFlag, *protocolFlag, *consumerFlag)
+			functions.GetTopicLastActivity(kafkaAdmin, kafkaConsumer, *consumerFlag, *topicFlag, *warningFlag, *criticalFlag, *verboseFlag)
 		default:
 			fmt.Printf("no valid command\n")
 			os.Exit(9)
