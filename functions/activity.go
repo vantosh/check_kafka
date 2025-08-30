@@ -22,6 +22,7 @@ import (
 func GetTopicLastActivity(aK *kafka.AdminClient, cK *kafka.Consumer, consumerGroupName string, topicName string, warningLevel int64, criticalLevel int64, verboseBool bool) {
 	partitions := GetTopicPartitions(aK, topicName)
 
+	nowTimestamp := time.Now()
 	var latestTimestamp time.Time
 
 	for _, p := range partitions {
@@ -59,6 +60,17 @@ func GetTopicLastActivity(aK *kafka.AdminClient, cK *kafka.Consumer, consumerGro
 		}
 	}
 
-	fmt.Printf("Latest activity timestamp for topic '%s': %v\n", topicName, latestTimestamp)
-	os.Exit(0)
+	timestampDiff := nowTimestamp.Unix() - latestTimestamp.Unix()
+
+	fmt.Printf("Latest activity for topic %s at %s\n", topicName, latestTimestamp.Format("Mon 02 January 2006 15:04:05"))
+	fmt.Printf("|diff=%d;%d;%d;0;99999;", timestampDiff, warningLevel, criticalLevel)
+	if(timestampDiff > criticalLevel) {
+		os.Exit(2)
+	} else if(timestampDiff > warningLevel) {
+		os.Exit(1)
+	} else {
+		os.Exit(0)
+	}
+
+
 }
