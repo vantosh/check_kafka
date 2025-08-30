@@ -62,7 +62,7 @@ func GetTopicLastActivity(aK *kafka.AdminClient, cK *kafka.Consumer, consumerGro
 
 	timestampDiff := nowTimestamp.Unix() - latestTimestamp.Unix()
 
-	fmt.Printf("Latest activity for topic %s at %s\n", topicName, latestTimestamp.Format("Mon 02 January 2006 15:04:05"))
+	fmt.Printf("Latest activity for topic %s at %s\n", topicName, latestTimestamp.Format("Monday 02 January 2006 15:04:05"))
 	fmt.Printf("|diff=%d;%d;%d;0;99999;", timestampDiff, warningLevel, criticalLevel)
 	if(timestampDiff > criticalLevel) {
 		os.Exit(2)
