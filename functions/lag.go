@@ -54,18 +54,23 @@ func GetConsumerGroupLag(aK *kafka.AdminClient, cK *kafka.Consumer, consumerGrou
 		topicLags = topicLags + topicLag
 	}
 
-	fmt.Printf("Consumer Group %s on topic %s has a Lag of %d \n", consumerGroupName, topicName, topicLags)
+	var preMsg string
+	var exitCode int = 3
+	if(topicLags > criticalLevel) {
+		preMsg = "[CRITICAL] CRITICAL"
+		exitCode = 2
+	} else if(topicLags > warningLevel) {
+		preMsg = "[WARNING] WARNING"
+		exitCode = 1
+	} else {
+		preMsg = "[OK] OK"
+		exitCode = 0
+	}
+
+	fmt.Printf("%s Consumer Group %s on topic %s has a Lag of %d \n", preMsg, consumerGroupName, topicName, topicLags)
 	if(verboseBool == true) {
 		fmt.Printf(debugLines)
 	}
 	fmt.Printf("|lag=%d;%d;%d;0;999999;", topicLags, warningLevel, criticalLevel)
-	if(topicLags > criticalLevel) {
-		os.Exit(2)
-	} else if(topicLags > warningLevel) {
-		os.Exit(1)
-	} else {
-		os.Exit(0)
-	}
-
-
+	os.Exit(exitCode)
 }
