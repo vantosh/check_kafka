@@ -12,7 +12,6 @@
 package functions
 
 import (
-	//"context"
 	"fmt"
 	"os"
 	"time"
@@ -52,7 +51,7 @@ func GetTopicLastActivity(aK *kafka.AdminClient, cK *kafka.Consumer, consumerGro
 		lastMSG, errMSG := cK.ReadMessage(5 * time.Second)
 		if errMSG != nil {
 			fmt.Printf("Error reading last message from topic %s partition %d\nERROR: %s\n", topicName, p.Partition, errMSG)
-			os.Exit(2)
+			os.Exit(3)
 		}
 
 		if lastMSG.Timestamp.After(latestTimestamp) {
@@ -62,15 +61,20 @@ func GetTopicLastActivity(aK *kafka.AdminClient, cK *kafka.Consumer, consumerGro
 
 	timestampDiff := nowTimestamp.Unix() - latestTimestamp.Unix()
 
-	fmt.Printf("Latest activity for topic %s at %s\n", topicName, latestTimestamp.Format("Monday 02 January 2006 15:04:05"))
-	fmt.Printf("|diff=%d;%d;%d;0;99999;", timestampDiff, warningLevel, criticalLevel)
+	var preMsg string
+	var exitCode int = 3
 	if(timestampDiff > criticalLevel) {
-		os.Exit(2)
+		preMsg = "[CRITICAL] CRITICAL"
+		exitCode = 2
 	} else if(timestampDiff > warningLevel) {
-		os.Exit(1)
+		preMsg = "[WARNING] WARNiNG"
+		exitCode = 1
 	} else {
-		os.Exit(0)
+		preMsg = "[OK] OK"
+		exitCode = 0
 	}
 
-
+	fmt.Printf("%s Latest activity of topic %s on %s\n", preMsg, topicName, latestTimestamp.Format("Monday 02 January 2006 15:04:05"))
+	fmt.Printf("|diff=%d;%d;%d;0;99999;", timestampDiff, warningLevel, criticalLevel)
+	os.Exit(exitCode)
 }
