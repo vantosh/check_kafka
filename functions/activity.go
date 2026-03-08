@@ -1,7 +1,7 @@
 /*
  * check_kafka
  *
- * (c) Copyright 2024 VanTosh, all rights reserverd
+ * (c) Copyright 2024, 2026 VanTosh, all rights reserverd
  * Author : Toshaan Bharvani <toshaan@vantosh.com>
  *
  * Use of this source code is governed by a Apache 2.0 license,
@@ -32,26 +32,30 @@ func GetTopicLastActivity(aK *kafka.AdminClient, cK *kafka.Consumer, consumerGro
 
 		lowWM, highWM, errWM := cK.QueryWatermarkOffsets(topicName, p.Partition, 1000)
 		if(errWM != nil) {
-			fmt.Printf("Error getting watermark offsets for topic %s partition %d\n\tWatermarks : %d - %d\nERROR: %s\n", topicName, p.Partition, lowWM, highWM, errWM)
-			os.Exit(3)
+			if(verboseBool == true) {
+				fmt.Printf("Error getting watermark offsets for topic %s partition %d\n\tWatermarks : %d - %d\nERROR: %s\n", topicName, p.Partition, lowWM, highWM, errWM)
+			}
 		}
 
 		if highWM == 0 {
-			fmt.Printf("There is no high watermark for topic %s partition %d\n", topicName, p.Partition)
-			os.Exit(3)
+			if(verboseBool == true) {
+				fmt.Printf("There is no high watermark for topic %s partition %d\n", topicName, p.Partition)
+			}
 		}
 
 		tp.Offset = kafka.Offset(highWM - 1)
 		errTP := cK.Assign([]kafka.TopicPartition{tp})
 		if errTP != nil {
-			fmt.Printf("Failed to assign topic %s partition %d\nERROR: %s\n", topicName, p.Partition, errTP)
-			os.Exit(3)
+			if(verboseBool == true) {
+				fmt.Printf("Failed to assign topic %s partition %d\nERROR: %s\n", topicName, p.Partition, errTP)
+			}
 		}
 
 		lastMSG, errMSG := cK.ReadMessage(5 * time.Second)
 		if errMSG != nil {
-			fmt.Printf("Error reading last message from topic %s partition %d\nERROR: %s\n", topicName, p.Partition, errMSG)
-			os.Exit(3)
+			if(verboseBool == true) {
+				fmt.Printf("Error reading last message from topic %s partition %d\nERROR: %s\n", topicName, p.Partition, errMSG)
+			}
 		}
 
 		if lastMSG.Timestamp.After(latestTimestamp) {
