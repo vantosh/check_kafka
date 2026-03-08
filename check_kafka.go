@@ -15,12 +15,14 @@ import (
 	"fmt"
 	"os"
 	"flag"
+	"check_kafka/settings"
 	"check_kafka/functions"
 	"check_kafka/version"
 )
 
 func main() {
 	commandFlag := flag.String("command", "", "Command to execute")
+	configFlag := flag.String("config", "", "Config File")
 	clusterFlag := flag.String("cluster", "", "Cluster Bootstrap Servers")
 	usernameFlag := flag.String("username", "", "Username")
 	passwordFlag := flag.String("password", "", "Password")
@@ -37,7 +39,37 @@ func main() {
 		version.PrintVersion()
 		os.Exit(0)
 	} else {
-		kafkaAdmin := functions.AdminConnect(*clusterFlag, *usernameFlag, *passwordFlag, *authmethodFlag, *protocolFlag)
+		clusterMembers := *clusterFlag
+		userName := *usernameFlag
+		passWord := *passwordFlag
+		authMethod := *authmethodFlag
+		securityProtocol := *protocolFlag
+		if(*configFlag != "") {
+			settings := settings.Get(*configFlag)
+			if(len(settings.ClusterMembers) > 0) {
+				clusterMembers = ""
+				for i := 0 ; i < len(settings.ClusterMembers) ; i++ {
+					if(clusterMembers == "") {
+						clusterMembers = fmt.Sprintf("%s:%d", settings.ClusterMembers[i].Hostname, settings.ClusterMembers[i].Port)
+					} else {
+						clusterMembers = fmt.Sprintf("%s,%s:%d", clusterMembers, settings.ClusterMembers[i].Hostname, settings.ClusterMembers[i].Port)
+					}
+				}
+			}
+			if(settings.Username != "") {
+				userName = settings.Username
+			}
+			if(settings.Password != "") {
+				passWord = settings.Password
+			}
+			if(settings.SecurityProtocol != "") {
+				securityProtocol = settings.SecurityProtocol
+			}
+			if(settings.AuthMethod != "") {
+				authMethod = settings.AuthMethod
+			}
+		}
+		kafkaAdmin := functions.AdminConnect(clusterMembers, userName, passWord, authMethod, securityProtocol)
 		switch *commandFlag {
 		case "describecluster":
 			functions.GetClusterDetails(kafkaAdmin)
