@@ -41,25 +41,26 @@ func GetTopicLastActivity(aK *kafka.AdminClient, cK *kafka.Consumer, consumerGro
 			if(verboseBool == true) {
 				fmt.Printf("There is no high watermark for topic %s partition %d\n", topicName, p.Partition)
 			}
-		}
 
-		tp.Offset = kafka.Offset(highWM - 1)
-		errTP := cK.Assign([]kafka.TopicPartition{tp})
-		if errTP != nil {
-			if(verboseBool == true) {
-				fmt.Printf("Failed to assign topic %s partition %d\nERROR: %s\n", topicName, p.Partition, errTP)
+			//tp.Offset = kafka.Offset(highWM - 1)
+			tp.Offset = kafka.Offset(highWM)
+			errTP := cK.Assign([]kafka.TopicPartition{tp})
+			if errTP != nil {
+				if(verboseBool == true) {
+					fmt.Printf("Failed to assign topic %s partition %d\nERROR: %s\n", topicName, p.Partition, errTP)
+				}
 			}
-		}
 
-		lastMSG, errMSG := cK.ReadMessage(5 * time.Second)
-		if errMSG != nil {
-			if(verboseBool == true) {
-				fmt.Printf("Error reading last message from topic %s partition %d\nERROR: %s\n", topicName, p.Partition, errMSG)
+			lastMSG, errMSG := cK.ReadMessage(5 * time.Second)
+			if errMSG != nil {
+				if(verboseBool == true) {
+					fmt.Printf("Error reading last message from topic %s partition %d\nERROR: %s\n", topicName, p.Partition, errMSG)
+				}
 			}
-		}
 
-		if lastMSG.Timestamp.After(latestTimestamp) {
-			latestTimestamp = lastMSG.Timestamp
+			if lastMSG.Timestamp.After(latestTimestamp) {
+				latestTimestamp = lastMSG.Timestamp
+			}
 		}
 	}
 
