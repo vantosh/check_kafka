@@ -41,9 +41,12 @@ func GetTopicLastActivity(aK *kafka.AdminClient, cK *kafka.Consumer, consumerGro
 			if(verboseBool == true) {
 				fmt.Printf("There is no high watermark for topic %s partition %d\n", topicName, p.Partition)
 			}
+		} else if(highWM == lowWM) {
+				if(verboseBool == true) {
+					fmt.Printf("Low (%d) and High (%d) Watermark are equal on partition %d", lowWM, highWM, p.Partition)
+				}
 		} else {
-			//tp.Offset = kafka.Offset(highWM - 1)
-			tp.Offset = kafka.Offset(highWM)
+			tp.Offset = kafka.Offset(highWM - 1)
 			errTP := cK.Assign([]kafka.TopicPartition{tp})
 			if errTP != nil {
 				if(verboseBool == true) {
