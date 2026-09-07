@@ -13,9 +13,9 @@ package functions
 
 import (
 	"fmt"
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"os"
 	"time"
-	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
 func GetTopicLastActivity(aK *kafka.AdminClient, cK *kafka.Consumer, consumerGroupName string, topicName string, warningLevel int64, criticalLevel int64, verboseBool bool) {
@@ -26,37 +26,37 @@ func GetTopicLastActivity(aK *kafka.AdminClient, cK *kafka.Consumer, consumerGro
 
 	for _, p := range partitions {
 		tp := kafka.TopicPartition{
-			Topic: &topicName,
+			Topic:     &topicName,
 			Partition: p.Partition,
 		}
 
 		lowWM, highWM, errWM := cK.QueryWatermarkOffsets(topicName, p.Partition, 1000)
-		if(errWM != nil) {
-			if(verboseBool == true) {
+		if errWM != nil {
+			if verboseBool == true {
 				fmt.Printf("Error getting watermark offsets for topic %s partition %d\n\tWatermarks : %d - %d\nERROR: %s\n", topicName, p.Partition, lowWM, highWM, errWM)
 			}
 		}
 
 		if highWM == 0 {
-			if(verboseBool == true) {
+			if verboseBool == true {
 				fmt.Printf("There is no high watermark for topic %s partition %d\n", topicName, p.Partition)
 			}
-		} else if(highWM == lowWM) {
-				if(verboseBool == true) {
-					fmt.Printf("Low (%d) and High (%d) Watermark are equal on partition %d", lowWM, highWM, p.Partition)
-				}
+		} else if highWM == lowWM {
+			if verboseBool == true {
+				fmt.Printf("Low (%d) and High (%d) Watermark are equal on partition %d", lowWM, highWM, p.Partition)
+			}
 		} else {
 			tp.Offset = kafka.Offset(highWM - 1)
 			errTP := cK.Assign([]kafka.TopicPartition{tp})
 			if errTP != nil {
-				if(verboseBool == true) {
+				if verboseBool == true {
 					fmt.Printf("Failed to assign topic %s partition %d\nERROR: %s\n", topicName, p.Partition, errTP)
 				}
 			}
 
 			lastMSG, errMSG := cK.ReadMessage(5 * time.Second)
 			if errMSG != nil {
-				if(verboseBool == true) {
+				if verboseBool == true {
 					fmt.Printf("Error reading last message from topic %s partition %d\nERROR: %s\n", topicName, p.Partition, errMSG)
 				}
 			}
@@ -71,10 +71,10 @@ func GetTopicLastActivity(aK *kafka.AdminClient, cK *kafka.Consumer, consumerGro
 
 	var preMsg string
 	var exitCode int = 3
-	if(timestampDiff > criticalLevel) {
+	if timestampDiff > criticalLevel {
 		preMsg = "[CRITICAL] CRITICAL"
 		exitCode = 2
-	} else if(timestampDiff > warningLevel) {
+	} else if timestampDiff > warningLevel {
 		preMsg = "[WARNING] WARNiNG"
 		exitCode = 1
 	} else {

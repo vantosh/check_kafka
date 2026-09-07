@@ -14,9 +14,9 @@ package functions
 import (
 	"context"
 	"fmt"
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"os"
 	"time"
-	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
 func GetTopicDetails(aK *kafka.AdminClient, topicName string) {
@@ -55,7 +55,7 @@ func GetTopicPartitions(aK *kafka.AdminClient, topicName string) []kafka.TopicPa
 	var partitions []kafka.TopicPartition
 	for i := 0; i < len(describeTopicsResult.TopicDescriptions[0].Partitions); i++ {
 		partitions = append(partitions, kafka.TopicPartition{
-			Topic: &topicName,
+			Topic:     &topicName,
 			Partition: int32(describeTopicsResult.TopicDescriptions[0].Partitions[i].Partition),
 		})
 	}

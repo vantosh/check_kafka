@@ -14,9 +14,9 @@ package functions
 import (
 	"context"
 	"fmt"
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"os"
 	"time"
-	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
 func GetConsumerGroupLag(aK *kafka.AdminClient, cK *kafka.Consumer, consumerGroupName string, topicName string, warningLevel int64, criticalLevel int64, verboseBool bool) {
@@ -27,7 +27,7 @@ func GetConsumerGroupLag(aK *kafka.AdminClient, cK *kafka.Consumer, consumerGrou
 
 	gps := []kafka.ConsumerGroupTopicPartitions{
 		{
-			Group: consumerGroupName,
+			Group:      consumerGroupName,
 			Partitions: partitions,
 		},
 	}
@@ -41,7 +41,7 @@ func GetConsumerGroupLag(aK *kafka.AdminClient, cK *kafka.Consumer, consumerGrou
 	var debugLines string
 	for _, partValue := range partitions {
 		lowWM, highWM, errWM := cK.QueryWatermarkOffsets(topicName, int32(partValue.Partition), 1000)
-		if(errWM != nil) {
+		if errWM != nil {
 			fmt.Printf("Failed to get topic %s offset\n%s\n", topicName, errWM)
 		}
 		topicOffset := highWM
@@ -56,10 +56,10 @@ func GetConsumerGroupLag(aK *kafka.AdminClient, cK *kafka.Consumer, consumerGrou
 
 	var preMsg string
 	var exitCode int = 3
-	if(topicLags > criticalLevel) {
+	if topicLags > criticalLevel {
 		preMsg = "[CRITICAL] CRITICAL"
 		exitCode = 2
-	} else if(topicLags > warningLevel) {
+	} else if topicLags > warningLevel {
 		preMsg = "[WARNING] WARNING"
 		exitCode = 1
 	} else {
@@ -68,7 +68,7 @@ func GetConsumerGroupLag(aK *kafka.AdminClient, cK *kafka.Consumer, consumerGrou
 	}
 
 	fmt.Printf("%s Consumer Group %s on topic %s has a Lag of %d \n", preMsg, consumerGroupName, topicName, topicLags)
-	if(verboseBool == true) {
+	if verboseBool == true {
 		fmt.Printf(debugLines)
 	}
 	fmt.Printf("|lag=%d;%d;%d;0;999999;", topicLags, warningLevel, criticalLevel)

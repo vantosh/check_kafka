@@ -12,12 +12,12 @@
 package main
 
 import (
+	"check_kafka/functions"
+	"check_kafka/settings"
+	"check_kafka/version"
+	"flag"
 	"fmt"
 	"os"
-	"flag"
-	"check_kafka/settings"
-	"check_kafka/functions"
-	"check_kafka/version"
 )
 
 func main() {
@@ -35,7 +35,7 @@ func main() {
 	verboseFlag := flag.Bool("verbose", false, "Verbose output")
 	flag.Parse()
 
-	if(*commandFlag == "version") {
+	if *commandFlag == "version" {
 		version.PrintVersion()
 		os.Exit(0)
 	} else {
@@ -44,28 +44,28 @@ func main() {
 		passWord := *passwordFlag
 		authMethod := *authmethodFlag
 		securityProtocol := *protocolFlag
-		if(*configFlag != "") {
+		if *configFlag != "" {
 			settings := settings.Get(*configFlag)
-			if(len(settings.ClusterMembers) > 0) {
+			if len(settings.ClusterMembers) > 0 {
 				clusterMembers = ""
-				for i := 0 ; i < len(settings.ClusterMembers) ; i++ {
-					if(clusterMembers == "") {
+				for i := 0; i < len(settings.ClusterMembers); i++ {
+					if clusterMembers == "" {
 						clusterMembers = fmt.Sprintf("%s:%d", settings.ClusterMembers[i].Hostname, settings.ClusterMembers[i].Port)
 					} else {
 						clusterMembers = fmt.Sprintf("%s,%s:%d", clusterMembers, settings.ClusterMembers[i].Hostname, settings.ClusterMembers[i].Port)
 					}
 				}
 			}
-			if(settings.Username != "") {
+			if settings.Username != "" {
 				userName = settings.Username
 			}
-			if(settings.Password != "") {
+			if settings.Password != "" {
 				passWord = settings.Password
 			}
-			if(settings.SecurityProtocol != "") {
+			if settings.SecurityProtocol != "" {
 				securityProtocol = settings.SecurityProtocol
 			}
-			if(settings.AuthMethod != "") {
+			if settings.AuthMethod != "" {
 				authMethod = settings.AuthMethod
 			}
 		}

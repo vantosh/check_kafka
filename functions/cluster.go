@@ -14,9 +14,9 @@ package functions
 import (
 	"context"
 	"fmt"
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"os"
 	"time"
-	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
 func GetClusterDetails(aK *kafka.AdminClient) {

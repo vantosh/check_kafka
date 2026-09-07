@@ -14,9 +14,9 @@ package functions
 import (
 	"context"
 	"fmt"
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"os"
 	"time"
-	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
 func GetConsumerGroups(aK *kafka.AdminClient) {
@@ -53,15 +53,15 @@ func GetConsumerGroupDetails(aK *kafka.AdminClient, consumerGroupName string) {
 
 	cgState := fmt.Sprintf("%s", describeGroupsResult.ConsumerGroupDescriptions[0].State)
 	fmt.Printf("Consumer Group %s\n\tState: %s", consumerGroupName, describeGroupsResult.ConsumerGroupDescriptions[0].State)
-	if(cgState == "Unknown") {
+	if cgState == "Unknown" {
 		os.Exit(3)
 	}
 	fmt.Printf("\n\tCoordinator: %s", describeGroupsResult.ConsumerGroupDescriptions[0].Coordinator)
-	if(cgState == "Stable") {
+	if cgState == "Stable" {
 		os.Exit(0)
-	} else if(cgState == "Dead") {
+	} else if cgState == "Dead" {
 		os.Exit(2)
-	} else if(cgState == "PreparingRebalance" || cgState == "CompletingRebalance") {
+	} else if cgState == "PreparingRebalance" || cgState == "CompletingRebalance" {
 		os.Exit(1)
 	} else {
 		os.Exit(3)

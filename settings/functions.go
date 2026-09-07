@@ -1,9 +1,9 @@
 package settings
 
 import (
+	"fmt"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
-	"fmt"
 )
 
 func Get(filename string) *Config {
